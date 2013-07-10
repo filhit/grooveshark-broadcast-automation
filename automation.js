@@ -18,7 +18,7 @@
         };
 
         this.isBroadcastOwner = function () {
-            return $("#bc-col1").length > 0;
+            return $(".btn.edit-broadcast:visible").length > 0;
         };
 
         this.acceptOverrideListenersOrderPopup = function () {
