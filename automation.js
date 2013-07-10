@@ -1,6 +1,8 @@
 (function ($) {
     "use strict";
     var automationInterval = 5000;
+    var availableSongsUrl = "https://raw.github.com/filhit/renaissanceriver-playlist/master/songs.json";
+    var availableSongIds;
 
     var Grooveshark = function () {
         function runInWindowContext(func, param) {
@@ -49,6 +51,13 @@
         }
     };
 
+    function getRandomSongId() {
+        if (availableSongIds) {
+            var index = Math.floor(Math.random() * (availableSongIds.length));
+            return availableSongIds[index];
+        }
+    }
+
     function doAutomate() {
         var grooveshark = new Grooveshark();
         if (!grooveshark.isBroadcastOwner()) {
@@ -62,10 +71,20 @@
         if (!grooveshark.isPlaying()) {
             var approvedSuggestionsCount = grooveshark.approveAllSuggestions();
             if (approvedSuggestionsCount === 0) {
-                grooveshark.playSongsById([13963]);
+                var randomSongId = getRandomSongId();
+                if (randomSongId) {
+                    grooveshark.playSongsById([randomSongId]);
+                }
             }
         }
     }
 
+    function loadSongs() {
+        chrome.extension.sendRequest({action:'getJSON',url:availableSongsUrl}, function(songs) {
+            availableSongIds = songs.map(function (x) { return x.SongID; });
+        });
+    }
+
+    loadSongs();
     window.setInterval(doAutomate, automationInterval);
 }) (jQuery);
